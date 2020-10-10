@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "Banking": {
+      "schemaPath": "graphql/*.graphql",
+      "extensions": {
+        "endpoints": {
+          "default": {
+            "url": "http://localhost:8080/query",
+            "subscription": "ws://localhost:8080/query"
+          }
+        }
+      }
+    }
+  }
+}

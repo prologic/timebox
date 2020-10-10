@@ -1,0 +1,53 @@
+scalar AccountID
+scalar CustomerID
+scalar Money
+
+enum Currency {
+    EUR
+    USD
+    GBP
+}
+
+union Event =
+    AccountOpenedEvent |
+    MoneyDepositedEvent |
+    MoneyWithdrawnEvent
+
+type AccountOpenedEvent {
+    accountID: AccountID!
+    owner: String!
+}
+
+type MoneyDepositedEvent {
+    accountID: AccountID!
+    depositedAmount: Money!
+}
+
+type MoneyWithdrawnEvent {
+    accountID: AccountID!
+    withdrawnAmount: Money!
+}
+
+type AccountStatus {
+    accountID: AccountID!
+    balance: Money!
+}
+
+input OpenAccountCommand {
+    owner: String!
+}
+
+input MoneyTransferCommand {
+    accountID: AccountID!
+    amount: Money!
+}
+
+type Query {
+    accountStatus(accountID: AccountID!): AccountStatus!
+}
+
+type Mutation {
+    openAccount(input: OpenAccountCommand!): AccountID!
+    depositMoney(input: MoneyTransferCommand!): AccountID!
+    withdrawMoney(input: MoneyTransferCommand!): AccountID!
+}

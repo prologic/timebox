@@ -1,0 +1,27 @@
+schema:
+  - graphql/*.graphql
+
+exec:
+  filename: server/server_gen.go
+  package: server
+
+model:
+  filename: model/model_gen.go
+  package: model
+
+models:
+  Money:
+    model:
+      - banking/graphql.Money
+  ID:
+    model:
+      - banking/graphql.TimeboxID
+  AccountID:
+    model:
+      - banking/graphql.TimeboxID
+  CustomerID:
+    model:
+      - banking/graphql.TimeboxID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int64
