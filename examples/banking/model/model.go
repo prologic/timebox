@@ -13,7 +13,7 @@ type Checker interface {
 	Check() error
 }
 
-func (c *MoneyTransferCommand) Check() error {
+func (c *TransferMoney) Check() error {
 	if !c.Amount.IsPositive() {
 		return fmt.Errorf(errPositiveAmount)
 	}

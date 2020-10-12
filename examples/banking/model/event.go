@@ -9,9 +9,9 @@ import (
 
 // Event Names
 const (
-	AccountOpened  = "account-opened"
-	MoneyDeposited = "account-amount-deposited"
-	MoneyWithdrawn = "account-amount-withdrawn"
+	AccountOpenedEvent  = "account-opened"
+	MoneyDepositedEvent = "account-amount-deposited"
+	MoneyWithdrawnEvent = "account-amount-withdrawn"
 )
 
 type Account struct {
@@ -22,14 +22,14 @@ type Account struct {
 
 // TypedInstantiator is the instantiator for Events
 var TypedInstantiator = message.TypedInstantiator{
-	AccountOpened: func() message.Payload {
-		return &AccountOpenedEvent{}
+	AccountOpenedEvent: func() message.Payload {
+		return &AccountOpened{}
 	},
-	MoneyDeposited: func() message.Payload {
-		return &MoneyDepositedEvent{}
+	MoneyDepositedEvent: func() message.Payload {
+		return &MoneyDeposited{}
 	},
-	MoneyWithdrawn: func() message.Payload {
-		return &MoneyWithdrawnEvent{}
+	MoneyWithdrawnEvent: func() message.Payload {
+		return &MoneyWithdrawn{}
 	},
 }
 
@@ -50,16 +50,16 @@ func HydrateFrom(a *event.Aggregate, result store.Result) (*Account, error) {
 // Applier returns an Applier for the Account aggregate
 func (a *Account) Applier() event.Applier {
 	ta := event.TypedApplier{
-		AccountOpened:  makeAccountOpened(a),
-		MoneyDeposited: makeMoneyDeposited(a),
-		MoneyWithdrawn: makeMoneyWithdrawn(a),
+		AccountOpenedEvent:  makeAccountOpened(a),
+		MoneyDepositedEvent: makeMoneyDeposited(a),
+		MoneyWithdrawnEvent: makeMoneyWithdrawn(a),
 	}
 	return ta.Applier()
 }
 
 func makeAccountOpened(a *Account) event.Applier {
 	return func(e *timebox.Event) {
-		p := e.Payload.(*AccountOpenedEvent)
+		p := e.Payload.(*AccountOpened)
 		a.AccountID = p.AccountID
 		a.Owner = p.Owner
 		a.Balance = NewMoney(0, CurrencyEur)
@@ -68,7 +68,7 @@ func makeAccountOpened(a *Account) event.Applier {
 
 func makeMoneyDeposited(a *Account) event.Applier {
 	return func(e *timebox.Event) {
-		p := e.Payload.(*MoneyDepositedEvent)
+		p := e.Payload.(*MoneyDeposited)
 		res, _ := a.Balance.Add(p.DepositedAmount)
 		a.Balance = res
 	}
@@ -76,7 +76,7 @@ func makeMoneyDeposited(a *Account) event.Applier {
 
 func makeMoneyWithdrawn(a *Account) event.Applier {
 	return func(e *timebox.Event) {
-		p := e.Payload.(*MoneyWithdrawnEvent)
+		p := e.Payload.(*MoneyWithdrawn)
 		res, _ := a.Balance.Subtract(p.WithdrawnAmount)
 		a.Balance = res
 	}

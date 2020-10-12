@@ -14,39 +14,39 @@ type Event interface {
 	IsEvent()
 }
 
-type AccountOpenedEvent struct {
+type AccountOpened struct {
 	AccountID id.ID  `json:"accountID"`
 	Owner     string `json:"owner"`
 }
 
-func (AccountOpenedEvent) IsEvent() {}
+func (AccountOpened) IsEvent() {}
 
 type AccountStatus struct {
 	AccountID id.ID  `json:"accountID"`
 	Balance   *Money `json:"balance"`
 }
 
-type MoneyDepositedEvent struct {
+type MoneyDeposited struct {
 	AccountID       id.ID  `json:"accountID"`
 	DepositedAmount *Money `json:"depositedAmount"`
 }
 
-func (MoneyDepositedEvent) IsEvent() {}
+func (MoneyDeposited) IsEvent() {}
 
-type MoneyTransferCommand struct {
-	AccountID id.ID  `json:"accountID"`
-	Amount    *Money `json:"amount"`
-}
-
-type MoneyWithdrawnEvent struct {
+type MoneyWithdrawn struct {
 	AccountID       id.ID  `json:"accountID"`
 	WithdrawnAmount *Money `json:"withdrawnAmount"`
 }
 
-func (MoneyWithdrawnEvent) IsEvent() {}
+func (MoneyWithdrawn) IsEvent() {}
 
-type OpenAccountCommand struct {
+type OpenAccount struct {
 	Owner string `json:"owner"`
+}
+
+type TransferMoney struct {
+	AccountID id.ID  `json:"accountID"`
+	Amount    *Money `json:"amount"`
 }
 
 type Currency string

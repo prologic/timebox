@@ -46,7 +46,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	AccountOpenedEvent struct {
+	AccountOpened struct {
 		AccountID func(childComplexity int) int
 		Owner     func(childComplexity int) int
 	}
@@ -56,20 +56,20 @@ type ComplexityRoot struct {
 		Balance   func(childComplexity int) int
 	}
 
-	MoneyDepositedEvent struct {
+	MoneyDeposited struct {
 		AccountID       func(childComplexity int) int
 		DepositedAmount func(childComplexity int) int
 	}
 
-	MoneyWithdrawnEvent struct {
+	MoneyWithdrawn struct {
 		AccountID       func(childComplexity int) int
 		WithdrawnAmount func(childComplexity int) int
 	}
 
 	Mutation struct {
-		DepositMoney  func(childComplexity int, input model.MoneyTransferCommand) int
-		OpenAccount   func(childComplexity int, input model.OpenAccountCommand) int
-		WithdrawMoney func(childComplexity int, input model.MoneyTransferCommand) int
+		DepositMoney  func(childComplexity int, input model.TransferMoney) int
+		OpenAccount   func(childComplexity int, input model.OpenAccount) int
+		WithdrawMoney func(childComplexity int, input model.TransferMoney) int
 	}
 
 	Query struct {
@@ -78,9 +78,9 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	OpenAccount(ctx context.Context, input model.OpenAccountCommand) (id.ID, error)
-	DepositMoney(ctx context.Context, input model.MoneyTransferCommand) (id.ID, error)
-	WithdrawMoney(ctx context.Context, input model.MoneyTransferCommand) (id.ID, error)
+	OpenAccount(ctx context.Context, input model.OpenAccount) (id.ID, error)
+	DepositMoney(ctx context.Context, input model.TransferMoney) (id.ID, error)
+	WithdrawMoney(ctx context.Context, input model.TransferMoney) (id.ID, error)
 }
 type QueryResolver interface {
 	AccountStatus(ctx context.Context, accountID id.ID) (*model.AccountStatus, error)
@@ -101,19 +101,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "AccountOpenedEvent.accountID":
-		if e.complexity.AccountOpenedEvent.AccountID == nil {
+	case "AccountOpened.accountID":
+		if e.complexity.AccountOpened.AccountID == nil {
 			break
 		}
 
-		return e.complexity.AccountOpenedEvent.AccountID(childComplexity), true
+		return e.complexity.AccountOpened.AccountID(childComplexity), true
 
-	case "AccountOpenedEvent.owner":
-		if e.complexity.AccountOpenedEvent.Owner == nil {
+	case "AccountOpened.owner":
+		if e.complexity.AccountOpened.Owner == nil {
 			break
 		}
 
-		return e.complexity.AccountOpenedEvent.Owner(childComplexity), true
+		return e.complexity.AccountOpened.Owner(childComplexity), true
 
 	case "AccountStatus.accountID":
 		if e.complexity.AccountStatus.AccountID == nil {
@@ -129,33 +129,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountStatus.Balance(childComplexity), true
 
-	case "MoneyDepositedEvent.accountID":
-		if e.complexity.MoneyDepositedEvent.AccountID == nil {
+	case "MoneyDeposited.accountID":
+		if e.complexity.MoneyDeposited.AccountID == nil {
 			break
 		}
 
-		return e.complexity.MoneyDepositedEvent.AccountID(childComplexity), true
+		return e.complexity.MoneyDeposited.AccountID(childComplexity), true
 
-	case "MoneyDepositedEvent.depositedAmount":
-		if e.complexity.MoneyDepositedEvent.DepositedAmount == nil {
+	case "MoneyDeposited.depositedAmount":
+		if e.complexity.MoneyDeposited.DepositedAmount == nil {
 			break
 		}
 
-		return e.complexity.MoneyDepositedEvent.DepositedAmount(childComplexity), true
+		return e.complexity.MoneyDeposited.DepositedAmount(childComplexity), true
 
-	case "MoneyWithdrawnEvent.accountID":
-		if e.complexity.MoneyWithdrawnEvent.AccountID == nil {
+	case "MoneyWithdrawn.accountID":
+		if e.complexity.MoneyWithdrawn.AccountID == nil {
 			break
 		}
 
-		return e.complexity.MoneyWithdrawnEvent.AccountID(childComplexity), true
+		return e.complexity.MoneyWithdrawn.AccountID(childComplexity), true
 
-	case "MoneyWithdrawnEvent.withdrawnAmount":
-		if e.complexity.MoneyWithdrawnEvent.WithdrawnAmount == nil {
+	case "MoneyWithdrawn.withdrawnAmount":
+		if e.complexity.MoneyWithdrawn.WithdrawnAmount == nil {
 			break
 		}
 
-		return e.complexity.MoneyWithdrawnEvent.WithdrawnAmount(childComplexity), true
+		return e.complexity.MoneyWithdrawn.WithdrawnAmount(childComplexity), true
 
 	case "Mutation.depositMoney":
 		if e.complexity.Mutation.DepositMoney == nil {
@@ -167,7 +167,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DepositMoney(childComplexity, args["input"].(model.MoneyTransferCommand)), true
+		return e.complexity.Mutation.DepositMoney(childComplexity, args["input"].(model.TransferMoney)), true
 
 	case "Mutation.openAccount":
 		if e.complexity.Mutation.OpenAccount == nil {
@@ -179,7 +179,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.OpenAccount(childComplexity, args["input"].(model.OpenAccountCommand)), true
+		return e.complexity.Mutation.OpenAccount(childComplexity, args["input"].(model.OpenAccount)), true
 
 	case "Mutation.withdrawMoney":
 		if e.complexity.Mutation.WithdrawMoney == nil {
@@ -191,7 +191,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.WithdrawMoney(childComplexity, args["input"].(model.MoneyTransferCommand)), true
+		return e.complexity.Mutation.WithdrawMoney(childComplexity, args["input"].(model.TransferMoney)), true
 
 	case "Query.accountStatus":
 		if e.complexity.Query.AccountStatus == nil {
@@ -279,22 +279,19 @@ enum Currency {
     GBP
 }
 
-union Event =
-    AccountOpenedEvent |
-    MoneyDepositedEvent |
-    MoneyWithdrawnEvent
+union Event = AccountOpened | MoneyDeposited | MoneyWithdrawn
 
-type AccountOpenedEvent {
+type AccountOpened {
     accountID: AccountID!
     owner: String!
 }
 
-type MoneyDepositedEvent {
+type MoneyDeposited {
     accountID: AccountID!
     depositedAmount: Money!
 }
 
-type MoneyWithdrawnEvent {
+type MoneyWithdrawn {
     accountID: AccountID!
     withdrawnAmount: Money!
 }
@@ -304,11 +301,11 @@ type AccountStatus {
     balance: Money!
 }
 
-input OpenAccountCommand {
+input OpenAccount {
     owner: String!
 }
 
-input MoneyTransferCommand {
+input TransferMoney {
     accountID: AccountID!
     amount: Money!
 }
@@ -318,9 +315,9 @@ type Query {
 }
 
 type Mutation {
-    openAccount(input: OpenAccountCommand!): AccountID!
-    depositMoney(input: MoneyTransferCommand!): AccountID!
-    withdrawMoney(input: MoneyTransferCommand!): AccountID!
+    openAccount(input: OpenAccount!): AccountID!
+    depositMoney(input: TransferMoney!): AccountID!
+    withdrawMoney(input: TransferMoney!): AccountID!
 }
 `, BuiltIn: false},
 }
@@ -333,10 +330,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_depositMoney_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.MoneyTransferCommand
+	var arg0 model.TransferMoney
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNMoneyTransferCommand2bankingᚋmodelᚐMoneyTransferCommand(ctx, tmp)
+		arg0, err = ec.unmarshalNTransferMoney2bankingᚋmodelᚐTransferMoney(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -348,10 +345,10 @@ func (ec *executionContext) field_Mutation_depositMoney_args(ctx context.Context
 func (ec *executionContext) field_Mutation_openAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.OpenAccountCommand
+	var arg0 model.OpenAccount
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNOpenAccountCommand2bankingᚋmodelᚐOpenAccountCommand(ctx, tmp)
+		arg0, err = ec.unmarshalNOpenAccount2bankingᚋmodelᚐOpenAccount(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -363,10 +360,10 @@ func (ec *executionContext) field_Mutation_openAccount_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_withdrawMoney_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.MoneyTransferCommand
+	var arg0 model.TransferMoney
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNMoneyTransferCommand2bankingᚋmodelᚐMoneyTransferCommand(ctx, tmp)
+		arg0, err = ec.unmarshalNTransferMoney2bankingᚋmodelᚐTransferMoney(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -443,7 +440,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AccountOpenedEvent_accountID(ctx context.Context, field graphql.CollectedField, obj *model.AccountOpenedEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountOpened_accountID(ctx context.Context, field graphql.CollectedField, obj *model.AccountOpened) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -451,7 +448,7 @@ func (ec *executionContext) _AccountOpenedEvent_accountID(ctx context.Context, f
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "AccountOpenedEvent",
+		Object:     "AccountOpened",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -478,7 +475,7 @@ func (ec *executionContext) _AccountOpenedEvent_accountID(ctx context.Context, f
 	return ec.marshalNAccountID2githubᚗcomᚋkode4foodᚋtimeboxᚋidᚐID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountOpenedEvent_owner(ctx context.Context, field graphql.CollectedField, obj *model.AccountOpenedEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountOpened_owner(ctx context.Context, field graphql.CollectedField, obj *model.AccountOpened) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -486,7 +483,7 @@ func (ec *executionContext) _AccountOpenedEvent_owner(ctx context.Context, field
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "AccountOpenedEvent",
+		Object:     "AccountOpened",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -583,7 +580,7 @@ func (ec *executionContext) _AccountStatus_balance(ctx context.Context, field gr
 	return ec.marshalNMoney2ᚖbankingᚋmodelᚐMoney(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MoneyDepositedEvent_accountID(ctx context.Context, field graphql.CollectedField, obj *model.MoneyDepositedEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _MoneyDeposited_accountID(ctx context.Context, field graphql.CollectedField, obj *model.MoneyDeposited) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -591,7 +588,7 @@ func (ec *executionContext) _MoneyDepositedEvent_accountID(ctx context.Context, 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "MoneyDepositedEvent",
+		Object:     "MoneyDeposited",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -618,7 +615,7 @@ func (ec *executionContext) _MoneyDepositedEvent_accountID(ctx context.Context, 
 	return ec.marshalNAccountID2githubᚗcomᚋkode4foodᚋtimeboxᚋidᚐID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MoneyDepositedEvent_depositedAmount(ctx context.Context, field graphql.CollectedField, obj *model.MoneyDepositedEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _MoneyDeposited_depositedAmount(ctx context.Context, field graphql.CollectedField, obj *model.MoneyDeposited) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -626,7 +623,7 @@ func (ec *executionContext) _MoneyDepositedEvent_depositedAmount(ctx context.Con
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "MoneyDepositedEvent",
+		Object:     "MoneyDeposited",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -653,7 +650,7 @@ func (ec *executionContext) _MoneyDepositedEvent_depositedAmount(ctx context.Con
 	return ec.marshalNMoney2ᚖbankingᚋmodelᚐMoney(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MoneyWithdrawnEvent_accountID(ctx context.Context, field graphql.CollectedField, obj *model.MoneyWithdrawnEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _MoneyWithdrawn_accountID(ctx context.Context, field graphql.CollectedField, obj *model.MoneyWithdrawn) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -661,7 +658,7 @@ func (ec *executionContext) _MoneyWithdrawnEvent_accountID(ctx context.Context, 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "MoneyWithdrawnEvent",
+		Object:     "MoneyWithdrawn",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -688,7 +685,7 @@ func (ec *executionContext) _MoneyWithdrawnEvent_accountID(ctx context.Context, 
 	return ec.marshalNAccountID2githubᚗcomᚋkode4foodᚋtimeboxᚋidᚐID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MoneyWithdrawnEvent_withdrawnAmount(ctx context.Context, field graphql.CollectedField, obj *model.MoneyWithdrawnEvent) (ret graphql.Marshaler) {
+func (ec *executionContext) _MoneyWithdrawn_withdrawnAmount(ctx context.Context, field graphql.CollectedField, obj *model.MoneyWithdrawn) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -696,7 +693,7 @@ func (ec *executionContext) _MoneyWithdrawnEvent_withdrawnAmount(ctx context.Con
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "MoneyWithdrawnEvent",
+		Object:     "MoneyWithdrawn",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -748,7 +745,7 @@ func (ec *executionContext) _Mutation_openAccount(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().OpenAccount(rctx, args["input"].(model.OpenAccountCommand))
+		return ec.resolvers.Mutation().OpenAccount(rctx, args["input"].(model.OpenAccount))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -790,7 +787,7 @@ func (ec *executionContext) _Mutation_depositMoney(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DepositMoney(rctx, args["input"].(model.MoneyTransferCommand))
+		return ec.resolvers.Mutation().DepositMoney(rctx, args["input"].(model.TransferMoney))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -832,7 +829,7 @@ func (ec *executionContext) _Mutation_withdrawMoney(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().WithdrawMoney(rctx, args["input"].(model.MoneyTransferCommand))
+		return ec.resolvers.Mutation().WithdrawMoney(rctx, args["input"].(model.TransferMoney))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2049,8 +2046,28 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputMoneyTransferCommand(ctx context.Context, obj interface{}) (model.MoneyTransferCommand, error) {
-	var it model.MoneyTransferCommand
+func (ec *executionContext) unmarshalInputOpenAccount(ctx context.Context, obj interface{}) (model.OpenAccount, error) {
+	var it model.OpenAccount
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "owner":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			it.Owner, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTransferMoney(ctx context.Context, obj interface{}) (model.TransferMoney, error) {
+	var it model.TransferMoney
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -2077,26 +2094,6 @@ func (ec *executionContext) unmarshalInputMoneyTransferCommand(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputOpenAccountCommand(ctx context.Context, obj interface{}) (model.OpenAccountCommand, error) {
-	var it model.OpenAccountCommand
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "owner":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
-			it.Owner, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2105,27 +2102,27 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.AccountOpenedEvent:
-		return ec._AccountOpenedEvent(ctx, sel, &obj)
-	case *model.AccountOpenedEvent:
+	case model.AccountOpened:
+		return ec._AccountOpened(ctx, sel, &obj)
+	case *model.AccountOpened:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AccountOpenedEvent(ctx, sel, obj)
-	case model.MoneyDepositedEvent:
-		return ec._MoneyDepositedEvent(ctx, sel, &obj)
-	case *model.MoneyDepositedEvent:
+		return ec._AccountOpened(ctx, sel, obj)
+	case model.MoneyDeposited:
+		return ec._MoneyDeposited(ctx, sel, &obj)
+	case *model.MoneyDeposited:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._MoneyDepositedEvent(ctx, sel, obj)
-	case model.MoneyWithdrawnEvent:
-		return ec._MoneyWithdrawnEvent(ctx, sel, &obj)
-	case *model.MoneyWithdrawnEvent:
+		return ec._MoneyDeposited(ctx, sel, obj)
+	case model.MoneyWithdrawn:
+		return ec._MoneyWithdrawn(ctx, sel, &obj)
+	case *model.MoneyWithdrawn:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._MoneyWithdrawnEvent(ctx, sel, obj)
+		return ec._MoneyWithdrawn(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -2135,24 +2132,24 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 
 // region    **************************** object.gotpl ****************************
 
-var accountOpenedEventImplementors = []string{"AccountOpenedEvent", "Event"}
+var accountOpenedImplementors = []string{"AccountOpened", "Event"}
 
-func (ec *executionContext) _AccountOpenedEvent(ctx context.Context, sel ast.SelectionSet, obj *model.AccountOpenedEvent) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, accountOpenedEventImplementors)
+func (ec *executionContext) _AccountOpened(ctx context.Context, sel ast.SelectionSet, obj *model.AccountOpened) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, accountOpenedImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AccountOpenedEvent")
+			out.Values[i] = graphql.MarshalString("AccountOpened")
 		case "accountID":
-			out.Values[i] = ec._AccountOpenedEvent_accountID(ctx, field, obj)
+			out.Values[i] = ec._AccountOpened_accountID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "owner":
-			out.Values[i] = ec._AccountOpenedEvent_owner(ctx, field, obj)
+			out.Values[i] = ec._AccountOpened_owner(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2199,24 +2196,24 @@ func (ec *executionContext) _AccountStatus(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var moneyDepositedEventImplementors = []string{"MoneyDepositedEvent", "Event"}
+var moneyDepositedImplementors = []string{"MoneyDeposited", "Event"}
 
-func (ec *executionContext) _MoneyDepositedEvent(ctx context.Context, sel ast.SelectionSet, obj *model.MoneyDepositedEvent) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, moneyDepositedEventImplementors)
+func (ec *executionContext) _MoneyDeposited(ctx context.Context, sel ast.SelectionSet, obj *model.MoneyDeposited) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, moneyDepositedImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("MoneyDepositedEvent")
+			out.Values[i] = graphql.MarshalString("MoneyDeposited")
 		case "accountID":
-			out.Values[i] = ec._MoneyDepositedEvent_accountID(ctx, field, obj)
+			out.Values[i] = ec._MoneyDeposited_accountID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "depositedAmount":
-			out.Values[i] = ec._MoneyDepositedEvent_depositedAmount(ctx, field, obj)
+			out.Values[i] = ec._MoneyDeposited_depositedAmount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2231,24 +2228,24 @@ func (ec *executionContext) _MoneyDepositedEvent(ctx context.Context, sel ast.Se
 	return out
 }
 
-var moneyWithdrawnEventImplementors = []string{"MoneyWithdrawnEvent", "Event"}
+var moneyWithdrawnImplementors = []string{"MoneyWithdrawn", "Event"}
 
-func (ec *executionContext) _MoneyWithdrawnEvent(ctx context.Context, sel ast.SelectionSet, obj *model.MoneyWithdrawnEvent) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, moneyWithdrawnEventImplementors)
+func (ec *executionContext) _MoneyWithdrawn(ctx context.Context, sel ast.SelectionSet, obj *model.MoneyWithdrawn) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, moneyWithdrawnImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("MoneyWithdrawnEvent")
+			out.Values[i] = graphql.MarshalString("MoneyWithdrawn")
 		case "accountID":
-			out.Values[i] = ec._MoneyWithdrawnEvent_accountID(ctx, field, obj)
+			out.Values[i] = ec._MoneyWithdrawn_accountID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "withdrawnAmount":
-			out.Values[i] = ec._MoneyWithdrawnEvent_withdrawnAmount(ctx, field, obj)
+			out.Values[i] = ec._MoneyWithdrawn_withdrawnAmount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2658,13 +2655,8 @@ func (ec *executionContext) marshalNMoney2ᚖbankingᚋmodelᚐMoney(ctx context
 	return res
 }
 
-func (ec *executionContext) unmarshalNMoneyTransferCommand2bankingᚋmodelᚐMoneyTransferCommand(ctx context.Context, v interface{}) (model.MoneyTransferCommand, error) {
-	res, err := ec.unmarshalInputMoneyTransferCommand(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNOpenAccountCommand2bankingᚋmodelᚐOpenAccountCommand(ctx context.Context, v interface{}) (model.OpenAccountCommand, error) {
-	res, err := ec.unmarshalInputOpenAccountCommand(ctx, v)
+func (ec *executionContext) unmarshalNOpenAccount2bankingᚋmodelᚐOpenAccount(ctx context.Context, v interface{}) (model.OpenAccount, error) {
+	res, err := ec.unmarshalInputOpenAccount(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -2681,6 +2673,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNTransferMoney2bankingᚋmodelᚐTransferMoney(ctx context.Context, v interface{}) (model.TransferMoney, error) {
+	res, err := ec.unmarshalInputTransferMoney(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

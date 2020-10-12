@@ -8,22 +8,19 @@ enum Currency {
     GBP
 }
 
-union Event =
-    AccountOpenedEvent |
-    MoneyDepositedEvent |
-    MoneyWithdrawnEvent
+union Event = AccountOpened | MoneyDeposited | MoneyWithdrawn
 
-type AccountOpenedEvent {
+type AccountOpened {
     accountID: AccountID!
     owner: String!
 }
 
-type MoneyDepositedEvent {
+type MoneyDeposited {
     accountID: AccountID!
     depositedAmount: Money!
 }
 
-type MoneyWithdrawnEvent {
+type MoneyWithdrawn {
     accountID: AccountID!
     withdrawnAmount: Money!
 }
@@ -33,11 +30,11 @@ type AccountStatus {
     balance: Money!
 }
 
-input OpenAccountCommand {
+input OpenAccount {
     owner: String!
 }
 
-input MoneyTransferCommand {
+input TransferMoney {
     accountID: AccountID!
     amount: Money!
 }
@@ -47,7 +44,7 @@ type Query {
 }
 
 type Mutation {
-    openAccount(input: OpenAccountCommand!): AccountID!
-    depositMoney(input: MoneyTransferCommand!): AccountID!
-    withdrawMoney(input: MoneyTransferCommand!): AccountID!
+    openAccount(input: OpenAccount!): AccountID!
+    depositMoney(input: TransferMoney!): AccountID!
+    withdrawMoney(input: TransferMoney!): AccountID!
 }

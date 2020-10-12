@@ -19,30 +19,30 @@ const (
 
 // Command types
 const (
-	OpenAccount   = "open-account"
-	DepositMoney  = "deposit-money"
-	WithdrawMoney = "withdraw-money"
+	OpenAccountCommand   = "open-account"
+	DepositMoneyCommand  = "deposit-money"
+	WithdrawMoneyCommand = "withdraw-money"
 )
 
-// OpenAccountCommandWithID attaches a newly generated ID to the Command
-type OpenAccountCommandWithID struct {
-	model.OpenAccountCommand
+// OpenAccountWithID attaches a newly generated ID to the Command
+type OpenAccountWithID struct {
+	model.OpenAccount
 	model.AccountID
 }
 
 // Handler returns a new Handler for Account-related Commands
 func Handler(es *event.Source) command.Handler {
 	th := command.TypedHandler{
-		OpenAccount:   makeOpenAccount(es),
-		DepositMoney:  makeDepositMoney(es),
-		WithdrawMoney: makeWithdrawMoney(es),
+		OpenAccountCommand:   makeOpenAccount(es),
+		DepositMoneyCommand:  makeDepositMoney(es),
+		WithdrawMoneyCommand: makeWithdrawMoney(es),
 	}
 	return th.Handler()
 }
 
 func makeOpenAccount(es *event.Source) command.Handler {
 	return func(c *timebox.Command) error {
-		p := c.Payload.(OpenAccountCommandWithID)
+		p := c.Payload.(OpenAccountWithID)
 		return es.With(
 			p.AccountID,
 			func(a *event.Aggregate, result store.Result) error {
@@ -50,8 +50,8 @@ func makeOpenAccount(es *event.Source) command.Handler {
 					return fmt.Errorf(errAccountExists, p.AccountID)
 				}
 				a.Raise(event.New(
-					model.AccountOpened,
-					&model.AccountOpenedEvent{
+					model.AccountOpenedEvent,
+					&model.AccountOpened{
 						AccountID: p.AccountID,
 						Owner:     p.Owner,
 					},
@@ -64,7 +64,7 @@ func makeOpenAccount(es *event.Source) command.Handler {
 
 func makeDepositMoney(es *event.Source) command.Handler {
 	return func(c *command.Command) error {
-		p := c.Payload.(model.MoneyTransferCommand)
+		p := c.Payload.(model.TransferMoney)
 		if err := p.Check(); err != nil {
 			return err
 		}
@@ -76,8 +76,8 @@ func makeDepositMoney(es *event.Source) command.Handler {
 					return err
 				}
 				a.Raise(event.New(
-					model.MoneyDeposited,
-					&model.MoneyDepositedEvent{
+					model.MoneyDepositedEvent,
+					&model.MoneyDeposited{
 						AccountID:       p.AccountID,
 						DepositedAmount: p.Amount,
 					},
@@ -90,7 +90,7 @@ func makeDepositMoney(es *event.Source) command.Handler {
 
 func makeWithdrawMoney(es *event.Source) command.Handler {
 	return func(c *command.Command) error {
-		p := c.Payload.(model.MoneyTransferCommand)
+		p := c.Payload.(model.TransferMoney)
 		if err := p.Check(); err != nil {
 			return err
 		}
@@ -102,8 +102,8 @@ func makeWithdrawMoney(es *event.Source) command.Handler {
 					return err
 				} else {
 					a.Raise(event.New(
-						model.MoneyWithdrawn,
-						&model.MoneyWithdrawnEvent{
+						model.MoneyWithdrawnEvent,
+						&model.MoneyWithdrawn{
 							AccountID:       p.AccountID,
 							WithdrawnAmount: p.Amount,
 						},

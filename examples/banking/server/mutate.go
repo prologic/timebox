@@ -27,25 +27,25 @@ func newMutationResolver(r *resolver) MutationResolver {
 }
 
 func (m *mutations) OpenAccount(
-	_ context.Context, input model.OpenAccountCommand,
+	_ context.Context, input model.OpenAccount,
 ) (id.ID, error) {
 	accountID := id.New()
-	return accountID, m.invoke(OpenAccount, OpenAccountCommandWithID{
-		OpenAccountCommand: input,
-		AccountID:          accountID,
+	return accountID, m.invoke(OpenAccountCommand, OpenAccountWithID{
+		OpenAccount: input,
+		AccountID:   accountID,
 	})
 }
 
 func (m *mutations) DepositMoney(
-	_ context.Context, input model.MoneyTransferCommand,
+	_ context.Context, input model.TransferMoney,
 ) (id.ID, error) {
-	return input.AccountID, m.invoke(DepositMoney, input)
+	return input.AccountID, m.invoke(DepositMoneyCommand, input)
 }
 
 func (m *mutations) WithdrawMoney(
-	_ context.Context, input model.MoneyTransferCommand,
+	_ context.Context, input model.TransferMoney,
 ) (id.ID, error) {
-	return input.AccountID, m.invoke(WithdrawMoney, input)
+	return input.AccountID, m.invoke(WithdrawMoneyCommand, input)
 }
 
 func (m *mutations) invoke(
