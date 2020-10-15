@@ -35,7 +35,12 @@ var TypedInstantiator = message.TypedInstantiator{
 
 // HydrateFrom creates a new Account instance and hydrates it with the
 // Events that can be retrieved from the provided Store Result. Those
-// Events are then applied the specified instance
+// Events are then applied to the specified instance.
+//
+// This is the absolute most simple way to do this, but it means that
+// instances are always built from the entire historical record. If
+// aggregates have a lot of events, it may eventually make sense to
+// perform snapshots.
 func HydrateFrom(a *event.Aggregate, result store.Result) (*Account, error) {
 	e, err := result.Events()
 	if err != nil {
@@ -47,7 +52,9 @@ func HydrateFrom(a *event.Aggregate, result store.Result) (*Account, error) {
 	return acc, nil
 }
 
-// Applier returns an Applier for the Account aggregate
+// Applier returns an Applier for the Account aggregate. The Applier
+// it returns is a TypedApplier, but could even be a single Handler
+// function driven by a switch statement
 func (a *Account) Applier() event.Applier {
 	ta := event.TypedApplier{
 		AccountOpenedEvent:  makeAccountOpened(a),

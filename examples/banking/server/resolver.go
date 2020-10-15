@@ -10,13 +10,13 @@ type resolver struct {
 	source *event.Source
 }
 
-// NewResolver returns a new ResolverRoot instance
+// NewResolver returns a new ResolverRoot instance that wraps our
+// Store and an event sourcing interface for that Store
 func NewResolver(s store.Store) ResolverRoot {
-	r := &resolver{
+	return &resolver{
 		store:  s,
 		source: event.NewSource(s),
 	}
-	return r
 }
 
 // Mutation returns MutationResolver implementation.

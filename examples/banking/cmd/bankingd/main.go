@@ -19,18 +19,25 @@ import (
 	"github.com/kode4food/timebox/store/local"
 )
 
+// Environment variables
 const (
-	defaultPort = "8080"
-	defaultFile = "minibase.db"
+	PORT     = "PORT"
+	DATABASE = "DATABASE"
+
+	defaultPort     = "8080"
+	defaultDatabase = "events.db"
 )
 
 func main() {
-	port := envLookup("PORT", defaultPort)
-	datafile := envLookup("DATAFILE", defaultFile)
+	port := envLookup(PORT, defaultPort)
+	database := envLookup(DATABASE, defaultDatabase)
 
 	base, _ := os.Getwd()
+
+	// Create a Local Event Store (using BitCask) and register a set of
+	// Decoders for our application's event types (ex: AccountOpened)
 	db, err := local.Open(
-		local.Path(path.Join(base, datafile)),
+		local.Path(path.Join(base, database)),
 		local.Decoder(model.TypedInstantiator.Decoder()),
 	)
 	if err != nil {
@@ -38,17 +45,24 @@ func main() {
 		os.Exit(1)
 	}
 
-	var router = mux.NewRouter()
+	router := mux.NewRouter()
 	router.Use(setAllowOriginMiddleware)
+
+	// srv gets a ResolverRoot that utilizes our db for event sourcing
 	srv := makeServer(server.NewResolver(db))
+
+	// Create routes for both the GraphQL playground and our resolvers
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
+	// Start listening for requests
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func setAllowOriginMiddleware(next http.Handler) http.Handler {
+	// This middleware is not secure, best to not use it in production
+	// unless combining it with strong authentication and authorization
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
@@ -59,6 +73,8 @@ func setAllowOriginMiddleware(next http.Handler) http.Handler {
 }
 
 func makeServer(root server.ResolverRoot) *handler.Server {
+	// Create a GraphQL executable schema instance and register our
+	// resolver root with it
 	srv := handler.New(
 		server.NewExecutableSchema(server.Config{
 			Resolvers: root,
