@@ -4,31 +4,33 @@ Timebox is an Event Sourcing reference implementation, written in Go. Included i
 
 ## Event Sourcing: A Glossary
 
-* Event Sourcing: The practice of describing all changes to a system as a sequence of Events rather than as operations against mutable data models.
+- Event Sourcing: The practice of describing all changes to a system as a sequence of Events rather than as operations against mutable data models.
 
-* Aggregate: A group of objects or entities that are related to one another. They are accessible via a single object or entity, known as the Aggregate Root. An event sourced system performs all Commands through an Aggregate, rather than directly against its descendants. The Aggregate establishes and maintains the integrity of its descendants.
+- Aggregate: A group of objects or entities that are related to one another. They are accessible via a single object or entity, known as the Aggregate Root. An event sourced system performs all Commands through an Aggregate, rather than directly against its descendants. The Aggregate establishes and maintains the integrity of its descendants.
 
-* Applier (Calculator): An interface that is implemented in order to Apply a raised Event to an Aggregate. Appliers only apply state changes to an Aggregate. They do not verify the validity of the Aggregate or the Event.
+- Applier (Calculator): An interface that is implemented in order to Apply a raised Event to an Aggregate. Appliers only apply state changes to an Aggregate. They do not verify the validity of the Aggregate or the Event.
 
-* Command: A message that encapsulates the intent of a user or component to perform some business-related action against the system. Command should be described in terms of the intent rather than the resulting change (ex: `CancelRide` rather than `SetRideStatus`). Depending on the current state of the system, a Command may or may not succeed.
+- Command: A message that encapsulates the intent of a user or component to perform some business-related action against the system. Command should be described in terms of the intent rather than the resulting change (ex: `CancelRide` rather than `SetRideStatus`). Depending on the current state of the system, a Command may or may not succeed.
 
-* Command Handler: An interface that is implemented in order to handle a Command.
+- Command Handler: An interface that is implemented in order to handle a Command.
 
-* Command Retry Handler: Wraps another Command handler, repeating the entire Command should a Version Consistency Error occur.
+- Command Retry Handler: Wraps another Command handler, repeating the entire Command should a Version Consistency Error occur.
 
-* Events: A message that describes a discrete change to a system. Events should generally be described in terms of business processes rather than implementation details (ex: `PassengerEnteredVehicle` rather than `DriverPushedButton`). Events must be applied in the order they were persisted.
+- Events: A message that describes a discrete change to a system. Events should generally be described in terms of business processes rather than implementation details (ex: `PassengerEnteredVehicle` rather than `DriverPushedButton`). Events must be applied in the order they were persisted.
 
-* Event Handler: An interface that is implemented in order to handle an Event.
+- Event Handler: An interface that is implemented in order to handle an Event.
 
-* Event Store: Stores the sequential set of Events that would be used to Hydrate an Aggregate, and the Raised Events created when successfully performing a Command against an Aggregate.
+- Event Store: Stores the sequential set of Events that would be used to Hydrate an Aggregate, and the Raised Events created when successfully performing a Command against an Aggregate.
 
-* Hydrate: To Apply the set of Events necessary to bring an Aggregate to a desired state. Most of the time, that state will be *current*, and so all stored Events for the Aggregate will be Applied.
+- Hydrate: To Apply the set of Events necessary to bring an Aggregate to a desired state. Most of the time, that state will be _current_, and so all stored Events for the Aggregate will be Applied.
 
-* Typed Message Handler: A Message Handler designed to dispatch the handling of a Message to a specific Handler based on the Message's type. One may register multiple handlers per type. The dispatcher invokes the most recently registered handler first. Intermediate errors short-circuit the processing.
+- Typed Message Handler: A Message Handler designed to dispatch the handling of a Message to a specific Handler based on the Message's type. One may register multiple handlers per type. The dispatcher invokes the most recently registered handler first. Intermediate errors short-circuit the processing.
 
-* Typed Command Handler: A Command Handler designed to relay Command handling to a specific Handler based on the Command's type. One may only register a single handler per type.
+- Typed Command Handler: A Command Handler designed to relay Command handling to a specific Handler based on the Command's type. One may only register a single handler per type.
 
 ## Event Sourcing: One Possible Flow
+
+<img src="./doc/readme-example-flow.svg"/>
 
 1. Typed Command Handler accepts a Command and invokes the appropriate Command Handler for the Command's type.
 
