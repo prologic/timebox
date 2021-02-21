@@ -23,13 +23,13 @@ type Account struct {
 // TypedInstantiator is the instantiator for Events
 var TypedInstantiator = message.TypedInstantiator{
 	AccountOpenedEvent: func() message.Payload {
-		return &AccountOpened{}
+		return new(AccountOpened)
 	},
 	MoneyDepositedEvent: func() message.Payload {
-		return &MoneyDeposited{}
+		return new(MoneyDeposited)
 	},
 	MoneyWithdrawnEvent: func() message.Payload {
-		return &MoneyWithdrawn{}
+		return new(MoneyWithdrawn)
 	},
 }
 
@@ -46,7 +46,7 @@ func HydrateFrom(a *event.Aggregate, result store.Result) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	acc := &Account{}
+	acc := new(Account)
 	a.ApplyTo(acc.Applier())
 	a.HydrateFrom(e)
 	return acc, nil

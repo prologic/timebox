@@ -18,12 +18,12 @@ func TestTypedInstantiators(t *testing.T) {
 	as := assert.New(t)
 	ti1 := message.TypedInstantiator{
 		"test1": func() message.Payload {
-			return &testStruct{}
+			return new(testStruct)
 		},
 	}
 	ti2 := message.TypedInstantiator{
 		"test2": func() message.Payload {
-			return &testStruct{}
+			return new(testStruct)
 		},
 	}
 	ti3 := ti1.Combine(ti2)
@@ -51,7 +51,7 @@ func TestTypedInstantiatorDecoder(t *testing.T) {
 
 	d := message.TypedInstantiator{
 		"test": func() message.Payload {
-			return &testStruct{}
+			return new(testStruct)
 		},
 	}.Decoder()
 

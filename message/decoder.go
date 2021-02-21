@@ -26,7 +26,7 @@ type (
 // RawDecoder is a decoder that simply returns a Message with a
 // json.RawMessage Payload
 func RawDecoder(data []byte) (*Message, error) {
-	raw := &decodingMessage{}
+	raw := new(decodingMessage)
 	if err := json.Unmarshal(data, raw); err != nil {
 		return nil, err
 	}

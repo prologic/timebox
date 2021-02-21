@@ -15,7 +15,7 @@ type (
 
 func (t TypedInstantiator) Decoder() Decoder {
 	return func(data []byte) (*Message, error) {
-		raw := &decodingMessage{}
+		raw := new(decodingMessage)
 		if err := json.Unmarshal(data, raw); err != nil {
 			return nil, err
 		}
